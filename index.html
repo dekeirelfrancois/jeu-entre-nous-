@@ -207,6 +207,7 @@
     <div class="die" id="dieA"><div class="ico">💋</div><div id="dieAv">Action</div></div>
     <div class="die" id="dieB"><div class="ico">📍</div><div id="dieBv">Zone</div></div>
   </div>
+  <div class="chips" id="desZonesChip" style="justify-content:center;margin-top:6px"></div>
   <div id="desZone"></div>
   <button class="btn" id="btnDes">Lancer les dés 🎲</button>
   <p class="muted" style="margin-top:12px">Celui ou celle qui lance choisit qui exécute... ou laissez le hasard décider 😉</p>
@@ -363,6 +364,15 @@ torride:[
 "Jeux de bouche : embrasse-le/la comme tu le ferais s'il fallait le/la convaincre de tout arrêter. Il/elle juge 😈",
 "La position tout ou rien : choisis entre « tout pour lui/elle pendant 3 minutes » ou « tout pour toi pendant 3 minutes ». Il/elle arbitrera en cas de conflit.",
 "Chuchote-lui à l'oreille, avec les mots les plus crus que tu oses, ce que tu vas lui faire dès que cette carte est terminée.",
+"Allonge-le/la, écarte doucement ses cuisses : embrasse, souffle et lèche autour de son sexe... sans jamais le toucher. Trois minutes de patience 😈",
+"Sa vulve est ta seule mission pendant 3 minutes : alterne caresses du bout des doigts et bisous. Il/elle tient le compte.",
+"Son pénis est ta mission : mais interdiction de vous presser. Main et bouche uniquement, à un rythme exaspérant.",
+"Chatouille-le/la avec le bout de la langue, de l'intérieur des cuisses jusqu'à ses parties intimes... et respectez la frontière qu'il/elle fixe.",
+"Ta langue sur son sexe : 60 secondes. Il/elle guide à voix haute : « plus », « là », « ne t'arrête pas ».",
+"Jeux de bouche et de doigts en même temps sur ses parties intimes : coordonne-toi. Deux minutes, sans t'arrêter.",
+"Chacun caresse les parties intimes de l'autre en même temps, 2 minutes. La première main qui tremble gagne un bisou où l'autre décide.",
+"Fais-le/la s'allonger et ferme les yeux : ta mission, lui faire perdre le contrôle de sa respiration. Zone : son sexe. Votre seule limite : son « stop ».",
+"Caresse tout autour de son sexe sans le toucher, en imitant les gestes que tu voudrais recevoir. Il/elle corrige en direct : « plus doux », « plus fort », « encore ».",
 "Massage final : de l'huile, tout le corps, en silence. La seule règle : ne pas toucher « là où on croit ». Le suspense est le jeu 😏"
 ]
 };
@@ -394,6 +404,21 @@ const DIE_B = [
   {i:"🫁", v:"le dos"},
   {i:"✨", v:"la zone au choix"}
 ];
+const DIE_B_INTIMES = [
+  {i:"😈", v:"les parties intimes"},
+  {i:"👅", v:"le sexe (vulve ou pénis)"},
+  {i:"🍑", v:"les fesses"},
+  {i:"🦵", v:"l'intérieur des cuisses"}
+];
+function dieBPool(){ return S.desTorride ? DIE_B.concat(DIE_B_INTIMES) : DIE_B; }
+function renderDesChip(){
+  const w=$("desZonesChip"); w.innerHTML="";
+  const c=document.createElement("div");
+  c.className="chip"+(S.desTorride?" on":"");
+  c.textContent="Zones intimes 😈";
+  c.onclick=()=>{ S.desTorride=!S.desTorride; save(); renderDesChip(); };
+  w.appendChild(c);
+}
 
 /* ================= ÉTAT / STOCKAGE ================= */
 const DEFAULT = () => ({
@@ -403,6 +428,7 @@ const DEFAULT = () => ({
   jokers1:1, jokers2:1,
   soirees:0,
   played:0, jokersUsed:0,
+  desTorride:false,
   current:null,
   custom:[]
 });
@@ -596,7 +622,7 @@ $("btnPioche").onclick = ()=>{
 };
 
 /* ================= DÉS ================= */
-function resetDes(){ $("dieAv").textContent="Action"; $("dieBv").textContent="Zone"; $("desZone").innerHTML=""; $("btnDes").disabled=false; }
+function resetDes(){ renderDesChip(); $("dieAv").textContent="Action"; $("dieB").querySelector(".ico").textContent="💋"; $("dieBv").textContent="Zone"; $("desZone").innerHTML=""; $("btnDes").disabled=false; }
 $("btnDes").onclick = ()=>{
   $("btnDes").disabled=true;
   const da=$("dieA"), db=$("dieB");
@@ -604,13 +630,15 @@ $("btnDes").onclick = ()=>{
   scrollTo({top:0,behavior:"smooth"});
   let n=0;
   const iv=setInterval(()=>{
-    $("dieAv").textContent = pick(DIE_A).v.replace("Chuchote","Chuchote");
-    $("dieBv").textContent = pick(DIE_B).v;
+    $("dieAv").textContent = pick(DIE_A).v;
+    const rollB = pick(dieBPool());
+    $("dieBv").textContent = rollB.v;
+    $("dieB").querySelector(".ico").textContent = rollB.i;
   },90);
   setTimeout(()=>{
     clearInterval(iv);
     da.classList.remove("rolling"); db.classList.remove("rolling");
-    const a=pick(DIE_A), b=pick(DIE_B);
+    const a=pick(DIE_A), b=pick(dieBPool());
     $("dieAv").textContent=a.v; $("dieBv").textContent=b.v;
     da.querySelector(".ico").textContent = a.i.replace(".whisper","🤫");
     db.querySelector(".ico").textContent = b.i;
