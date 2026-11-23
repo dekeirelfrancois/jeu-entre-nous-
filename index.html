@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1a0b1f">
+<title>Notre Jeu de Soir 💞</title>
+<style>
+  :root{
+    --bg:#1a0b1f;
+    --bg2:#2b1030;
+    --card:rgba(255,255,255,.06);
+    --border:rgba(255,255,255,.14);
+    --accent:#ff5c8a;
+    --accent2:#b76bff;
+    --gold:#ffcf6b;
+    --text:#fdf2f6;
+    --muted:#c9a8bd;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 20% -10%,#3d1140 0%,var(--bg2) 45%,var(--bg) 100%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 14px 40px;
+  }
+  h1{font-size:1.5rem;text-align:center;margin:14px 0 4px;letter-spacing:.3px}
+  .subtitle{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:20px}
+  .screen{display:none;width:100%;max-width:460px;animation:fadeIn .35s ease}
+  .screen.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:18px;
+    margin-bottom:14px;
+    backdrop-filter:blur(8px);
+  }
+  .btn{
+    display:block;width:100%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff;border:none;border-radius:16px;
+    padding:16px;font-size:1.05rem;font-weight:600;
+    margin-bottom:12px;cursor:pointer;
+    transition:transform .12s ease,filter .12s ease;
+  }
+  .btn:active{transform:scale(.97);filter:brightness(1.1)}
+  .btn.secondary{background:rgba(255,255,255,.08);border:1px solid var(--border)}
+  .btn.small{padding:12px;font-size:.95rem;border-radius:13px}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  label{display:block;font-size:.85rem;color:var(--muted);margin:12px 0 6px}
+  input[type=text]{
+    width:100%;padding:13px 14px;border-radius:13px;
+    border:1px solid var(--border);background:rgba(0,0,0,.25);
+    color:var(--text);font-size:1rem;outline:none;
+  }
+  input[type=text]:focus{border-color:var(--accent)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chip{
+    padding:9px 15px;border-radius:999px;border:1px solid var(--border);
+    background:rgba(255,255,255,.05);color:var(--muted);
+    font-size:.9rem;cursor:pointer;user-select:none;transition:all .15s;
+  }
+  .chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+  .scorebar{
+    display:flex;justify-content:space-between;align-items:center;
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:10px 16px;margin-bottom:14px;
+    font-weight:600;font-size:.95rem;
+  }
+  .scorebar .pts{color:var(--gold);font-size:1.1rem}
+  .joker{
+    font-size:.75rem;color:var(--muted);
+    border:1px solid var(--border);border-radius:999px;padding:4px 10px;
+  }
+  .bigbtn{
+    width:170px;height:170px;border-radius:50%;
+    border:5px solid var(--border);
+    background:conic-gradient(from 0deg,var(--accent),var(--accent2),var(--accent));
+    color:#fff;font-size:1.25rem;font-weight:800;
+    cursor:pointer;margin:24px auto;display:block;
+    box-shadow:0 0 40px rgba(255,92,138,.35);
+    transition:transform .2s;
+    letter-spacing:1px;
+  }
+  .bigbtn:disabled{cursor:default}
+  .spin {animation:spin 1.6s cubic-bezier(.2,.9,.3,1)}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(1080deg)}}
+  .result{
+    text-align:center;font-size:1.5rem;font-weight:800;
+    min-height:44px;margin:6px 0 12px;color:var(--gold);
+  }
+  .fusion{
+    background:linear-gradient(135deg,rgba(255,92,138,.18),rgba(183,107,255,.18));
+    border:1px solid var(--accent);
+    border-radius:20px;padding:22px;text-align:center;margin-bottom:14px;
+    animation:pop .3s ease;
+  }
+  @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .fusion .tag{font-size:.8rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .fusion .body{font-size:1.12rem;line-height:1.55;margin:12px 0}
+  .lvl-doux .tag{color:#8fd3ff}.lvl-doux{border-color:#8fd3ff}
+  .lvl-coquin .tag{color:var(--accent)}
+  .lvl-torride .tag{color:var(--gold)}.lvl-torride{border-color:var(--gold)}
+  .dice-row{display:flex;gap:12px;justify-content:center;margin:18px 0}
+  .die{
+    flex:1;max-width:150px;aspect-ratio:1;
+    background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:18px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-weight:700;text-align:center;padding:10px;gap:6px;
+  }
+  .die .ico{font-size:2rem}
+  .die small{color:var(--muted);font-weight:400}
+  .die.rolling{animation:shake .5s ease infinite}
+  @keyframes shake{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+  .rowbtns{display:flex;gap:10px}
+  .rowbtns .btn{flex:1}
+  .penalty{border-color:var(--gold);background:rgba(255,207,107,.12)}
+  .penalty .tag{color:var(--gold)}
+  .muted{color:var(--muted);font-size:.85rem;text-align:center;line-height:1.5}
+  textarea{
+    width:100%;min-height:80px;padding:13px;border-radius:13px;
+    border:1px solid var(--border);background:rgba(0,0,0,.25);
+    color:var(--text);font-family:inherit;font-size:.95rem;resize:vertical;outline:none;
+  }
+  textarea:focus{border-color:var(--accent)}
+  .custom-item{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    background:rgba(0,0,0,.2);border:1px solid var(--border);
+    border-radius:12px;padding:11px 13px;margin-bottom:8px;font-size:.9rem;
+  }
+  .custom-item span{flex:1;line-height:1.4}
+  .del{background:none;border:none;color:#ff7d9c;font-size:1.1rem;cursor:pointer;padding:4px}
+  .back{background:none;border:none;color:var(--muted);font-size:.9rem;cursor:pointer;margin-bottom:10px;padding:6px 2px}
+  .heart{display:inline-block;animation:beat 1.2s infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}12%{transform:scale(1.18)}24%{transform:scale(1)}36%{transform:scale(1.1)}}
+  .stats{display:flex;gap:10px;margin-top:4px}
+  .stat{flex:1;text-align:center;background:rgba(0,0,0,.2);border-radius:14px;padding:10px}
+  .stat b{display:block;font-size:1.3rem;color:var(--gold)}
+  .stat small{color:var(--muted)}
+  .footer{text-align:center;color:var(--muted);font-size:.75rem;margin-top:24px;opacity:.7}
+</style>
+</head>
+<body>
+
+<!-- ══════════ ÉCRAN ACCUEIL / CONFIG ══════════ -->
+<div class="screen active" id="scr-home">
+  <h1>Notre Jeu de Soir <span class="heart">💞</span></h1>
+  <p class="subtitle">À deux, sans téléphone qui traîne... enfin si, mais juste pour ça 😏</p>
+  <div class="card">
+    <label>Prénom de Madame</label>
+    <input type="text" id="name1" placeholder="Elle" maxlength="15">
+    <label>Prénom de Monsieur</label>
+    <input type="text" id="name2" placeholder="Lui" maxlength="15">
+    <label>Niveaux d'intensité pour ce soir</label>
+    <div class="chips" id="lvlChips"></div>
+    <div id="continueWrap" style="display:none;margin-top:16px">
+      <button class="btn secondary small" id="btnContinue">▶️ Reprendre la partie en cours</button>
+    </div>
+    <button class="btn" id="btnStart" style="margin-top:16px">Commencer la soirée 🔥</button>
+  </div>
+  <p class="footer">100% local : rien n'est envoyé nulle part, tout reste sur ce téléphone 🔒</p>
+</div>
+
+<!-- ══════════ MENU ══════════ -->
+<div class="screen" id="scr-menu">
+  <button class="back" data-to="scr-home">← Changer les réglages</button>
+  <div class="scorebar" id="scorebarMenu"></div>
+  <h1 style="font-size:1.2rem;margin-bottom:16px">Que joue-t-on ce soir ?</h1>
+  <button class="btn" data-modo="aoa">🎭 Action ou Vérité</button>
+  <button class="btn" data-modo="pioche">🃏 Pioche de défis</button>
+  <button class="btn" data-modo="des">🎲 Dés de l'amour</button>
+  <button class="btn" data-modo="roulette">🎡 Roulette 1&nbsp;2&nbsp;3</button>
+  <button class="btn secondary" data-modo="customs">✍️ Nos cartes perso</button>
+  <button class="btn secondary" data-modo="stats">📊 Nos stats</button>
+</div>
+
+<!-- ══════════ ACTION OU VÉRITÉ ══════════ -->
+<div class="screen" id="scr-aoa">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="scorebar" id="scorebarAoa"></div>
+  <button class="bigbtn" id="btnAoa">TOURNE !</button>
+  <div class="result" id="aoaResult">…</div>
+  <div id="aoaCardZone"></div>
+</div>
+
+<!-- ══════════ PIOCHE ══════════ -->
+<div class="screen" id="scr-pioche">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="scorebar" id="scorebarPioche"></div>
+  <p class="muted" style="margin:10px 0 14px">Le prochain à piocher est <b id="piocheWho">…</b></p>
+  <div id="piocheZone"></div>
+  <button class="btn" id="btnPioche">Piocher une carte 🃏</button>
+</div>
+
+<!-- ══════════ DÉS ══════════ -->
+<div class="screen" id="scr-des">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="scorebar" id="scorebarDes"></div>
+  <div class="dice-row">
+    <div class="die" id="dieA"><div class="ico">💋</div><div id="dieAv">Action</div></div>
+    <div class="die" id="dieB"><div class="ico">📍</div><div id="dieBv">Zone</div></div>
+  </div>
+  <div id="desZone"></div>
+  <button class="btn" id="btnDes">Lancer les dés 🎲</button>
+  <p class="muted" style="margin-top:12px">Celui ou celle qui lance choisit qui exécute... ou laissez le hasard décider 😉</p>
+</div>
+
+<!-- ══════════ ROULETTE ══════════ -->
+<div class="screen" id="scr-roulette">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="scorebar" id="scorebarRoulette"></div>
+  <p class="muted" style="margin:10px 0 14px">Le dé dans l'autre sens : <b>1</b> = à toi de jouer, <b>2</b> = à elle/lui de jouer, <b>3</b> = ensemble 🙈</p>
+  <div id="roulZone"></div>
+  <button class="btn" id="btnRoul">Lancer la roulette 🎡</button>
+</div>
+
+<!-- ══════════ CARTES PERSO ══════════ -->
+<div class="screen" id="scr-customs">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="card">
+    <label>Ta carte (ex : « Massage des pieds 5 min » ou « Raconte ta pire soirée »)</label>
+    <textarea id="customTxt" maxlength="220"></textarea>
+    <label>Type</label>
+    <div class="chips" id="customType"></div>
+    <label>Niveau</label>
+    <div class="chips" id="customLvl"></div>
+    <button class="btn small" id="btnAddCustom" style="margin-top:14px">Ajouter à notre jeu ➕</button>
+  </div>
+  <div id="customList"></div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<div class="screen" id="scr-stats">
+  <button class="back" data-to="scr-menu">← Menu</button>
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><b id="stPlayed">0</b><small>défis relevés</small></div>
+      <div class="stat"><b id="stJokers">0</b><small>jokers utilisés</small></div>
+      <div class="stat"><b id="stSoirees">0</b><small>soirées</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <p class="muted">« C'est le jeu qui gagne à ce qu'on y joue » — jouez honnête, arrêtez quand l'un de vous dit stop, et que le gagnant soit... vous deux 😌</p>
+  </div>
+  <button class="btn secondary small" id="btnResetSoiree">Nouvelle soirée (reset scores &amp; jokers)</button>
+  <button class="btn secondary small" id="btnResetAll">Tout effacer (sans pitié)</button>
+</div>
+
+<script>
+/* ================= DONNÉES ================= */
+const LEVELS = {doux:"Doux 😌", coquin:"Coquin 😏", torride:"Torride 🔥"};
+
+const VERITES = {
+doux:[
+"Quel est ton souvenir préféré de notre première soirée ensemble ?",
+"Qu'est-ce que tu trouves le plus séduisant chez moi ?",
+"Si on refaisait un rendez-vous de rêve, il ressemblerait à quoi ?",
+"Quel compliment aimerais-tu entendre plus souvent de ma part ?",
+"Quelle est la chanson qui te fait penser à nous ?",
+"À quel moment as-tu su que c'était sérieux entre nous ?",
+"Quel est le plus beau geste que je t'ai fait cette année ?",
+"Qu'est-ce que tu aimerais qu'on fasse plus souvent ensemble ?",
+"Quelle est ta plus grosse manie que je tolère héroïquement ?",
+"Si on partait ce week-end sans les enfants/sans travail, on irait où ?",
+"Qu'est-ce qui te fait craquer instantanément quand tu me regardes ?",
+"Quel compliment de moi t'a le plus touché·e ?",
+"Cite trois sons que tu adores entendre de moi.",
+"Quel est ton rituel du soir préféré avec moi ?",
+"Si tu devais me décrire en trois mots, lesquels ?"
+],
+coquin:[
+"Où est l'endroit le plus insolite où tu rêverais de m'embrasser ?",
+"Quelle est ta caresse préférée, celle qui te fait fermer les yeux ?",
+"Tu as déjà eu une pensée coquine pour moi dans la journée aujourd'hui ? Raconte.",
+"Quelle est ta tenue préférée sur moi ?",
+"Qu'est-ce que je fais (sans le savoir) qui te rend accro ?",
+"Quel est ton plus beau câlin, raconté sans censure excessive ?",
+"Tu préfères les soirs lents ou les soirs fougueux ? Pourquoi ?",
+"Quelle est ta plus grosse envie non exprimée en ce moment ?",
+"Quel message coquin as-tu failli m'envoyer mais jamais osé ?",
+"Quelle(s) partie(s) de mon corps tu regarderai(s) en premier à la plage ?",
+"Qu'est-ce qui te met le plus dans l'ambiance : les mots, les gestes ou le regard ?",
+"Raconte ta plus belle soirée à deux... la version abrégée 😏",
+"Où aimeriez-vous que je t'embrasse plus souvent ?",
+"Quelle petite manie de moi te met le plus en appétit 😏 ?",
+"Tu as un surnom coquin pour moi ? Balance."
+],
+torride:[
+"Quelle est ta position préférée... pour la sieste du dimanche, voyons 😈",
+"Quel est ton fantasme le plus doux que tu n'as encore jamais osé dire ?",
+"Tu préfères qu'on prenne son temps ou qu'on perde la tête ?",
+"Quelle est ta plus belle intention coquine pour cette nuit ?",
+"Si je devais te surprendre ce soir, tu aimerais que ce soit comment ?",
+"Quelle est ta zone préférée, celle dont tu ne te lasses pas ?",
+"Quelle est ta plus grosse envie que tu gardes « pour plus tard » ?",
+"Combien de temps as-tu pensé à ce jeu avant de le proposer 😏 ?",
+"Tu as déjà été surpris(e) en pensée à moi... où exactement ?",
+"Quel gage du mois dernier te reste-t-il à récupérer 😏 ?",
+"Slow, moderne, ou torride : ton programme idéal pour ce soir ?",
+"Quelle est ta plus grosse envie de ce soir, exprimée avec élégance 😈 ?"
+]
+};
+
+const ACTIONS = {
+doux:[
+"Massage des épaules pendant 2 minutes (avec les bons mots qui vont bien).",
+"Fais un slow années 90, 40 secondes, sans rigoler.",
+"Embrasse ton/ta partenaire sur la nuque, trois fois, très lentement.",
+"Chuchote trois compliments dans son oreille.",
+"Caresse-lui le bras du poignet à l'épaule, yeux dans les yeux, 30 secondes.",
+"Fais-lui un câlin de 60 secondes chrono, sans lâcher.",
+"Dessine un cœur au creux de sa main avec ton doigt.",
+"Offre-lui un bisou sur chaque main, en le regardant.",
+"Reproduis notre premier baiser, version revisionnée et améliorée.",
+"Prépare-lui à boire et apporte-le comme au restaurant.",
+"Décris à voix haute ce que tu aimes chez lui/elle, 30 secondes non-stop.",
+"Front contre front, yeux fermés, 45 secondes sans bouger.",
+"Souffle-lui doucement dans la nuque.",
+"Prends-lui la main et raconte un beau souvenir de nous.",
+"Embrasse-le/la sur le front et dis-lui pourquoi tu l'aimes."
+],
+coquin:[
+"Embrasse une zone au choix... au-dessus de la ceinture 😏",
+"Ote un vêtement de ton choix, avec style.",
+"Massage 2 minutes là où il/elle le demande.",
+"Approche très près, front contre front, et souffle-lui doucement sur la bouche.",
+"Embrasse-le/la dans le cou pendant 30 secondes sans t'arrêter.",
+"Reproduis le baiser le plus fou de notre histoire.",
+"Chuchote-lui ton envie la plus douce pour ce soir.",
+"Traverse la pièce en te déhanchant... en retirant un vêtement au passage.",
+"Embrasse-le/la derrière l'oreille jusqu'à ce qu'il/elle frissonne.",
+"Donne-lui un bisou sur chaque doigt, puis une surprise.",
+"Imite ton/ta partenaire en mode « dragueur du soir ».",
+"Fais un massage des mains avec les yeux fermés de lui/d'elle.",
+"30 secondes chronométrées de bisous... où tu veux, sans t'arrêter.",
+"Enfile ta tenue préférée et fais-lui la surprise (défilé obligatoire).",
+"Chuchote trois intentions pour cette nuit."
+],
+torride:[
+"Massage à mains nues, 3 minutes, zone au choix de l'autre. Peau contre peau autorisée 😈",
+"Fais-lui un tête-à-tête très proche et souffle-lui sur la nuque pendant 30 secondes.",
+"Embrasse ton/ta partenaire partout où ta bouche touche... dans la limite de ce qu'il/elle autorise.",
+"Ote deux vêtements, un par un, lentement, sous son regard.",
+"Chuchote-lui ton intention la plus hard... élégamment formulée.",
+"30 secondes où tu ne peux utiliser QUE tes lèvres. À toi de jouer.",
+"Fais-lui un câlin qui commence doux et termine très proche ⏱️ 60 s.",
+"Enlève un vêtement de son choix sur lui/elle, très lentement.",
+"Embrasse chaque zone qu'il/elle nomme (maximum trois).",
+"Prends sa main, pose-la là où tu aimerais qu'elle reste, et laisse-la 1 minute.",
+"Reproduis votre plus beau moment « sur le canapé »... version bonus.",
+"Danse très lentement contre lui/elle pendant 60 secondes, télécommande au sol.",
+"Offre-lui une traînée de baisers : du front à la ceinture, sans t'arrêter.",
+"Massage aux huiles : 3 minutes, en silence total."
+]
+};
+
+const GAGES = [
+"Donne trois compliments sincères, sans reprendre les mêmes mots.",
+"Danse 30 secondes sans musique sur un air imaginaire.",
+"Masse les pieds de l'autre pendant 1 minute.",
+"Raconte ta phrase la plus gênante de l'année, sans te dérober.",
+"Prépare le lit et l'ambiance pour plus tard 😉",
+"Serre l'autre dans tes bras 45 secondes sans lâcher, même s'il/elle gigote.",
+"Chante le refrain de notre chanson, a cappella, debout.",
+"Fais trois révélations douces sur ce que tu aimes la nuit."
+];
+
+const DIE_A = [
+  {i:"💋", v:"Embrasse"},
+  {i:"🤲", v:"Caresse"},
+  {i:"💨", v:"Souffle"},
+  {i:"🦷", v:"Mordille (gentiment)"},
+  {i:"👐", v:"Massage"},
+  {i:".whisper", v:"Chuchote"}
+];
+const DIE_B = [
+  {i:"👄", v:"les lèvres"},
+  {i:"🦢", v:"la nuque"},
+  {i:"👂", v:"l'oreille"},
+  {i:"🫱", v:"la main"},
+  {i:"🫁", v:"le dos"},
+  {i:"✨", v:"la zone au choix"}
+];
+
+/* ================= ÉTAT / STOCKAGE ================= */
+const DEFAULT = () => ({
+  name1:"Elle", name2:"Lui",
+  levels:["doux","coquin","torride"],
+  score1:0, score2:0,
+  jokers1:1, jokers2:1,
+  soirees:0,
+  played:0, jokersUsed:0,
+  current:null,
+  custom:[]
+});
+let S = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem("jeu-de-soir");
+    if(raw){ return Object.assign(DEFAULT(), JSON.parse(raw)); }
+  }catch(e){}
+  return DEFAULT();
+}
+function save(){ try{ localStorage.setItem("jeu-de-soir", JSON.stringify(S)); }catch(e){} }
+
+/* ================= OUTILS ================= */
+const $ = id => document.getElementById(id);
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0,0);
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function whoRef(){ return Math.random()<.5 ? S.name1 : S.name2; }
+function otherOf(who){ return who===S.name1 ? S.name2 : S.name1; }
+
+function scorebars(){
+  const html =
+    `<span>${S.name1} · <span class="pts">${S.score1}</span> <span class="joker">🃏 ${S.jokers1}</span></span>`+
+    `<span>${S.name2} · <span class="pts">${S.score2}</span> <span class="joker">🃏 ${S.jokers2}</span></span>`;
+  ["scorebarMenu","scorebarAoa","scorebarPioche","scorebarDes","scorebarRoulette"]
+    .forEach(id=>{ if($(id)) $(id).innerHTML = html; });
+}
+
+function pool(kind){
+  let arr = [];
+  S.levels.forEach(lvl=>{ arr = arr.concat((kind==="verite"?VERITES:ACTIONS)[lvl].map(t=>({t,lvl}))); });
+  if(kind==="action" && S.custom.length){
+    arr = arr.concat(S.custom.filter(c=>c.type==="action" && S.levels.includes(c.lvl)).map(c=>({t:c.text,lvl:c.lvl})));
+  }
+  return arr;
+}
+
+/* ================= ÉCRAN HOME ================= */
+const lvlWrap = $("lvlChips");
+Object.keys(LEVELS).forEach(l=>{
+  const c = document.createElement("div");
+  c.className = "chip" + (S.levels.includes(l)?" on":"");
+  c.textContent = LEVELS[l];
+  c.onclick = ()=>{
+    c.classList.toggle("on");
+    const set = new Set(S.levels);
+    set.has(l) ? set.delete(l) : set.add(l);
+    S.levels = Object.keys(LEVELS).filter(k=>set.has(k));
+    save();
+  };
+  lvlWrap.appendChild(c);
+});
+
+$("btnStart").onclick = ()=>{
+  S.name1 = $("name1").value.trim() || "Elle";
+  S.name2 = $("name2").value.trim() || "Lui";
+  if(!S.levels.length){ alert("Choisis au moins un niveau d'intensité 😉"); return; }
+  if(!S.current){
+    S.current = { who: Math.random()<.5 ? S.name1 : S.name2 };
+    S.soirees++;
+  }
+  save();
+  scorebars();
+  show("scr-menu");
+};
+
+if(S.current){
+  $("continueWrap").style.display = "block";
+  $("name1").value = S.name1; $("name2").value = S.name2;
+  $("btnContinue").onclick = ()=>{
+    if(!S.levels.length){ alert("Choisis au moins un niveau 😉"); return; }
+    scorebars(); show("scr-menu");
+  };
+} else {
+  $("name1").value = S.name1; $("name2").value = S.name2;
+}
+
+/* ================= NAVIGATION ================= */
+document.querySelectorAll("[data-to]").forEach(b=>b.onclick=()=>{ scorebars(); show(b.dataset.to); });
+document.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{
+  const m = b.dataset.modo;
+  if(m==="aoa"){ resetAoa(); }
+  if(m==="pioche"){ prepPioche(); }
+  if(m==="des"){ resetDes(); }
+  if(m==="roulette"){ resetRoul(); }
+  if(m==="customs"){ renderCustom(); }
+  if(m==="stats"){ renderStats(); }
+  show("scr-"+m);
+});
+
+/* ================= ACTION OU VÉRITÉ ================= */
+let aoaChoice = null;
+function resetAoa(){ aoaChoice=null; $("aoaResult").textContent="…"; $("aoaCardZone").innerHTML=""; $("btnAoa").disabled=false; }
+
+$("btnAoa").onclick = ()=>{
+  const btn = $("btnAoa");
+  btn.disabled = true;
+  btn.classList.remove("spin"); void btn.offsetWidth; btn.classList.add("spin");
+  const opts = ["ACTION","VÉRITÉ"];
+  let i=0;
+  const iv = setInterval(()=>{
+    $("aoaResult").textContent = opts[i++%2];
+  }, 110);
+  setTimeout(()=>{
+    clearInterval(iv);
+    aoaChoice = pick(opts);
+    $("aoaResult").textContent = aoaChoice + " pour " + (S.current ? S.current.who : whoRef()) + " !";
+    $("aoaCardZone").innerHTML = "";
+    drawCard(aoaChoice==="ACTION"?"action":"verite","aoaCardZone");
+    if(S.current){
+      S.current.who = otherOf(S.current.who);
+      save();
+    }
+    setTimeout(()=>{ btn.classList.remove("spin"); }, 1700);
+  }, 1600);
+};
+
+/* ================= CARTE GÉNÉRIQUE ================= */
+function drawCard(kind, zoneId, who){
+  const p = pool(kind);
+  if(!p.length){ $(zoneId).innerHTML = '<p class="muted">Plus de cartes à ce niveau… ajoutez-en ou changez de niveau ✍️</p>'; return; }
+  const c = pick(p);
+  const isPen = Math.random() < 0.12;
+  const card = document.createElement("div");
+  card.className = "fusion lvl-" + c.lvl + (isPen?" penalty":"");
+  const tag = isPen ? "Gage ! (refus sans joker)" : (kind==="verite" ? "Vérité · " : (zoneId==="aoaCardZone" ? "Action · " : "Défi · ")) + LEVELS[c.lvl];
+  card.innerHTML = `<div class="tag">${tag}</div><div class="body">${c.t}</div>
+    <div class="rowbtns">
+      <button class="btn small" data-done>Relevé ✅ +1</button>
+      <button class="btn small secondary" data-joker>🃏 Joker</button>
+      <button class="btn small secondary" data-pass>Passe 😅 -1</button>
+    </div>`;
+  $(zoneId).innerHTML="";
+  $(zoneId).appendChild(card);
+
+  const player = who || (S.current ? S.current.who : whoRef());
+  card.querySelector("[data-done]").onclick = ()=>{
+    if(player===S.name1) S.score1++; else S.score2++;
+    S.played++;
+    save(); scorebars();
+    card.innerHTML = `<div class="tag">Bien joué ${player} 🎉</div><div class="body">${c.t}</div>`;
+    if(zoneId==="aoaCardZone") $("btnAoa").disabled=false;
+    if(zoneId==="piocheZone") $("btnPioche").disabled=false;
+    if(zoneId==="roulZone") $("btnRoul").disabled=false;
+  };
+  card.querySelector("[data-joker]").onclick = ()=>{
+    const ok = player===S.name1 ? S.jokers1>0 : S.jokers2>0;
+    if(!ok){ alert("Plus de joker pour " + player + " ! Gage obligatoire 😈"); return; }
+    if(player===S.name1){ S.jokers1--; } else { S.jokers2--; }
+    S.jokersUsed++;
+    save(); scorebars();
+    card.innerHTML = `<div class="tag">Joker utilisé 🃏</div><div class="body">Tant pis pour cette carte... mais gare à la prochaine !</div>`;
+    if(zoneId==="aoaCardZone") $("btnAoa").disabled=false;
+    if(zoneId==="piocheZone") $("btnPioche").disabled=false;
+    if(zoneId==="roulZone") $("btnRoul").disabled=false;
+  };
+  card.querySelector("[data-pass]").onclick = ()=>{
+    if(player===S.name1){ S.score1=Math.max(0,S.score1-1); } else { S.score2=Math.max(0,S.score2-1); }
+    save(); scorebars();
+    const g = pick(GAGES);
+    card.className = "fusion penalty";
+    card.innerHTML = `<div class="tag">Gage de rattrapage</div><div class="body">${g}</div>
+      <button class="btn small" data-done2>Fait ✅</button>`;
+    card.querySelector("[data-done2]").onclick = ()=>{
+      card.innerHTML = `<div class="tag">Racheté·e 😌</div><div class="body">Toute faute se paie chez nous.</div>`;
+      if(zoneId==="aoaCardZone") $("btnAoa").disabled=false;
+      if(zoneId==="piocheZone") $("btnPioche").disabled=false;
+      if(zoneId==="roulZone") $("btnRoul").disabled=false;
+    };
+  };
+}
+
+/* ================= PIOCHE ================= */
+function prepPioche(){
+  const w = S.current ? S.current.who : whoRef();
+  $("piocheWho").textContent = w;
+  $("piocheZone").innerHTML="";
+  $("btnPioche").disabled=false;
+}
+$("btnPioche").onclick = ()=>{
+  $("btnPioche").disabled=true;
+  const w = $("piocheWho").textContent;
+  drawCard("action","piocheZone", w);
+  S.current = { who: otherOf(w) };
+  save();
+};
+
+/* ================= DÉS ================= */
+function resetDes(){ $("dieAv").textContent="Action"; $("dieBv").textContent="Zone"; $("desZone").innerHTML=""; $("btnDes").disabled=false; }
+$("btnDes").onclick = ()=>{
+  $("btnDes").disabled=true;
+  const da=$("dieA"), db=$("dieB");
+  da.classList.add("rolling"); db.classList.add("rolling");
+  scrollTo({top:0,behavior:"smooth"});
+  let n=0;
+  const iv=setInterval(()=>{
+    $("dieAv").textContent = pick(DIE_A).v.replace("Chuchote","Chuchote");
+    $("dieBv").textContent = pick(DIE_B).v;
+  },90);
+  setTimeout(()=>{
+    clearInterval(iv);
+    da.classList.remove("rolling"); db.classList.remove("rolling");
+    const a=pick(DIE_A), b=pick(DIE_B);
+    $("dieAv").textContent=a.v; $("dieBv").textContent=b.v;
+    da.querySelector(".ico").textContent = a.i.replace(".whisper","🤫");
+    db.querySelector(".ico").textContent = b.i;
+    const act = a.v, zone = b.v;
+    const p = pool("action")[0] ? true : false;
+    const who = whoRef();
+    const d=document.createElement("div");
+    d.className="fusion";
+    d.innerHTML=`<div class="tag">Mission 🎲</div>
+      <div class="body"><b>${who}</b> doit <b>${act.toLowerCase()}</b> <b>${zone}</b> de ${otherOf(who)}.</div>
+      <div class="rowbtns">
+        <button class="btn small" data-done>Exécution parfaite 🫡 +1</button>
+        <button class="btn small secondary" data-again>Relancer à l'autre 🔁</button>
+      </div>`;
+    $("desZone").innerHTML=""; $("desZone").appendChild(d);
+    d.querySelector("[data-done]").onclick=()=>{
+      if(who===S.name1) S.score1++; else S.score2++;
+      S.played++; save(); scorebars();
+      d.innerHTML=`<div class="tag">Mission accomplie ✅</div><div class="body">Et maintenant, qui lance ?</div>`;
+      $("btnDes").disabled=false;
+    };
+    d.querySelector("[data-again]").onclick=()=>{ $("btnDes").disabled=false; d.innerHTML=""; };
+  },1300);
+};
+
+/* ================= ROULETTE ================= */
+function resetRoul(){ $("roulZone").innerHTML=""; $("btnRoul").disabled=false; }
+$("btnRoul").onclick = ()=>{
+  $("btnRoul").disabled=true;
+  let n=0;
+  const iv=setInterval(()=>{ $("roulZone").innerHTML=`<div class="result">${[1,2,3][n++%3]}</div>`; },110);
+  setTimeout(()=>{
+    clearInterval(iv);
+    const r = 1+Math.floor(Math.random()*3);
+    const who = whoRef();
+    let txt = "";
+    if(r===1) txt = `<b>${who}</b> pioche un défi rien que pour lui/elle.`;
+    if(r===2) txt = `<b>${otherOf(who)}</b> doit exécuter le prochain défi.`;
+    if(r===3) txt = `Défi <b>à deux</b> : celui qui lit la carte à voix haute est <b>${who}</b>.`;
+    $("roulZone").innerHTML="";
+    const d=document.createElement("div");
+    d.className="fusion";
+    d.innerHTML=`<div class="tag">Roulette → ${r}</div><div class="body">${txt}</div>`;
+    $("roulZone").appendChild(d);
+    drawCard("action","roulZone", r===1? who : (r===2? otherOf(who) : null));
+  },1400);
+};
+
+/* ================= CARTES PERSO ================= */
+let customType="action", customLvl="doux";
+function chipGroup(wrapId, options, current, setFn){
+  const w=$(wrapId); w.innerHTML="";
+  options.forEach(([val,label])=>{
+    const c=document.createElement("div");
+    c.className="chip"+(current===val?" on":"");
+    c.textContent=label;
+    c.onclick=()=>{ setFn(val); chipGroup(wrapId, options, val, setFn); };
+    w.appendChild(c);
+  });
+}
+chipGroup("customType",[["action","💪 Action"],["verite","💬 Vérité"]],customType,v=>customType=v);
+chipGroup("customLvl",Object.entries(LEVELS),customLvl,v=>customLvl=v);
+
+$("btnAddCustom").onclick=()=>{
+  const t=$("customTxt").value.trim();
+  if(!t){ alert("Écris ta carte d'abord ✍️"); return; }
+  S.custom.push({text:t,type:customType,lvl:customLvl});
+  $("customTxt").value="";
+  save(); renderCustom();
+};
+function renderCustom(){
+  const w=$("customList");
+  if(!S.custom.length){ w.innerHTML='<p class="muted">Aucune carte perso. Celles que vous ajoutez viennent pimenter la pioche 😉</p>'; return; }
+  w.innerHTML="";
+  S.custom.forEach((c,i)=>{
+    const d=document.createElement("div");
+    d.className="custom-item";
+    d.innerHTML=`<span>${c.text}<br><small style="color:var(--muted)">${c.type==="action"?"💪":"💬"} · ${LEVELS[c.lvl]}</small></span>`;
+    const b=document.createElement("button");
+    b.className="del"; b.textContent="🗑"; b.onclick=()=>{ S.custom.splice(i,1); save(); renderCustom(); };
+    d.appendChild(b);
+    w.appendChild(d);
+  });
+}
+
+/* ================= STATS ================= */
+function renderStats(){
+  $("stPlayed").textContent = S.played;
+  $("stJokers").textContent = S.jokersUsed;
+  $("stSoirees").textContent = Math.max(S.soirees,0);
+}
+$("btnResetSoiree").onclick=()=>{
+  S.score1=0;S.score2=0;S.jokers1=1;S.jokers2=1;
+  S.current={who:Math.random()<.5?S.name1:S.name2};
+  S.soirees++; save(); scorebars();
+  alert("Nouvelle soirée lancée 💫");
+};
+$("btnResetAll").onclick=()=>{
+  if(confirm("Tout effacer ? Scores, cartes perso, tout ?")){
+    S=DEFAULT(); save(); location.reload();
+  }
+};
+
+scorebars();
+</script>
+</body>
+</html>
